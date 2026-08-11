@@ -5,22 +5,18 @@ public class binary {
 
     static int comparisons = 0;
 
-    public static int binarySearch(int arr[], int key) {
-
+    public static int binarySearch(int[] arr, int key) {
         int start = 0;
         int end = arr.length - 1;
 
         while (start <= end) {
-
             comparisons++;
 
-            int mid = (start + end) / 2;
+            int mid = start + (end - start) / 2;
 
             if (arr[mid] == key) {
                 return mid;
-            }
-
-            if (arr[mid] < key) {
+            } else if (arr[mid] < key) {
                 start = mid + 1;
             } else {
                 end = mid - 1;
@@ -31,15 +27,21 @@ public class binary {
     }
 
     public static void main(String[] args) {
-
         Scanner sc = new Scanner(System.in);
         Random random = new Random();
 
         System.out.print("Enter array size: ");
         int n = sc.nextInt();
 
-        int arr[] = new int[n];
+        if (n <= 0) {
+            System.out.println("Array size must be greater than 0.");
+            sc.close();
+            return;
+        }
 
+        int[] arr = new int[n];
+
+        // Generate sorted random array
         arr[0] = random.nextInt(10);
 
         for (int i = 1; i < n; i++) {
@@ -48,23 +50,18 @@ public class binary {
 
         System.out.println("Generated Sorted Array:");
 
-        if (n <= 100) {
-            for (int i = 0; i < n; i++) {
-                System.out.print(arr[i] + " ");
-            }
-            System.out.println();
+        // Prints array for any size, including 1000
+        for (int i = 0; i < n; i++) {
+            System.out.print(arr[i] + " ");
         }
+        System.out.println();
 
         System.out.print("Enter key: ");
         int key = sc.nextInt();
 
         long startTime = System.nanoTime();
-
         int result = binarySearch(arr, key);
-
         long endTime = System.nanoTime();
-
-        long time = endTime - startTime;
 
         System.out.println("\nResult:");
 
@@ -75,7 +72,7 @@ public class binary {
         }
 
         System.out.println("Comparisons: " + comparisons);
-        System.out.println("Execution time: " + time + " ns");
+        System.out.println("Execution time: " + (endTime - startTime) + " ns");
 
         if (comparisons == 1) {
             System.out.println("Case: Best Case");
@@ -89,7 +86,6 @@ public class binary {
         }
 
         System.out.println("Space Complexity: O(1)");
-
         sc.close();
     }
 }
