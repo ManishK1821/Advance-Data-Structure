@@ -10,7 +10,7 @@ class BST {
 
     Node root;
 
-    
+   
     Node insert(Node root, int data) {
         if (root == null)
             return new Node(data);
@@ -32,54 +32,63 @@ class BST {
         }
     }
 
-    void preorder(Node root) {
-        if (root != null) {
-            System.out.print(root.data + " ");
-            preorder(root.left);
-            preorder(root.right);
-        }
-    }
-
-    void postorder(Node root) {
-        if (root != null) {
-            postorder(root.left);
-            postorder(root.right);
-            System.out.print(root.data + " ");
-        }
+   
+    Node min(Node root) {
+        while (root.left != null)
+            root = root.left;
+        return root;
     }
 
     
-    boolean search(Node root, int key) {
-        if (root == null)
-            return false;
-
-        if (root.data == key)
-            return true;
+    Node delete(Node root, int key) {
+        if (root == null) return null;
 
         if (key < root.data)
-            return search(root.left, key);
-        else
-            return search(root.right, key);
+            root.left = delete(root.left, key);
+
+        else if (key > root.data)
+            root.right = delete(root.right, key);
+
+        else {
+            
+            if (root.left == null) return root.right;
+            if (root.right == null) return root.left;
+
+            
+            Node temp = min(root.right);
+            root.data = temp.data;
+            root.right = delete(root.right, temp.data);
+        }
+
+        return root;
     }
 
     public static void main(String[] args) {
-        BST tree = new BST();
 
         int[] a = {50, 30, 70, 20, 40, 60, 80, 10};
 
-        for (int x : a)
-            tree.root = tree.insert(tree.root, x);
+       
+        BST t = new BST();
+        for (int x : a) t.root = t.insert(t.root, x);
 
-        System.out.print("Inorder: ");
-        tree.inorder(tree.root);
+        t.root = t.delete(t.root, 10);
+        System.out.print("Delete leaf (10): ");
+        t.inorder(t.root);
 
-        System.out.print("\nPreorder: ");
-        tree.preorder(tree.root);
+       
+        t = new BST();
+        for (int x : a) t.root = t.insert(t.root, x);
 
-        System.out.print("\nPostorder: ");
-        tree.postorder(tree.root);
+        t.root = t.delete(t.root, 20);
+        System.out.print("\nDelete one child (20): ");
+        t.inorder(t.root);
 
-        System.out.println("\n\nSearch 40: " + tree.search(tree.root, 40));
-        System.out.println("Search 100: " + tree.search(tree.root, 100));
+        
+        t = new BST();
+        for (int x : a) t.root = t.insert(t.root, x);
+
+        t.root = t.delete(t.root, 70);
+        System.out.print("\nDelete two children (70): ");
+        t.inorder(t.root);
     }
 }
