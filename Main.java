@@ -25,7 +25,7 @@ import java.util.Scanner;
  *   Q 0 7
  *   Q 4 7
  */
-public class Main {
+public class SegmentTree {
 
     static class Result {
         final int min;
