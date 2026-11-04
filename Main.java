@@ -1,31 +1,11 @@
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Scanner;
 
 /**
- * Segment Tree for Range Minimum Query (RMQ) and Range Maximum Query.
- *
- * Input format (input.txt):
- *   n
- *   a0 a1 ... a(n-1)
- *   q
- *   Q left right       (range query, inclusive)
- *   U index newValue   (point update)
- *
- * Example:
- *   8
- *   12 5 18 3 9 21 7 14
- *   5
- *   Q 0 3
- *   Q 2 6
- *   U 3 25
- *   Q 0 7
- *   Q 4 7
+ * Segment Tree program for range minimum and maximum queries.
+ * The user enters the array and chooses operations from the console.
  */
-public class SegmentTree {
+public class Main {
 
     static class Result {
         final int min;
@@ -48,9 +28,6 @@ public class SegmentTree {
         private final boolean[] used;
 
         SegmentTree(int[] values) {
-            if (values == null || values.length == 0) {
-                throw new IllegalArgumentException("The array must contain at least one element.");
-            }
             n = values.length;
             minTree = new int[4 * n];
             maxTree = new int[4 * n];
@@ -94,14 +71,15 @@ public class SegmentTree {
                 return query(node * 2 + 1, middle + 1, end, left, right);
             }
 
-            Result first = query(node * 2, start, middle, left, middle);
-            Result second = query(node * 2 + 1, middle + 1, end, middle + 1, right);
-            return Result.merge(first, second);
+            return Result.merge(
+                query(node * 2, start, middle, left, middle),
+                query(node * 2 + 1, middle + 1, end, middle + 1, right)
+            );
         }
 
         void update(int index, int value) {
             if (index < 0 || index >= n) {
-                throw new IllegalArgumentException("Update index is outside the array: " + index);
+                throw new IllegalArgumentException("Index must be between 0 and " + (n - 1) + ".");
             }
             update(1, 0, n - 1, index, value);
         }
@@ -123,7 +101,7 @@ public class SegmentTree {
 
         private void validateRange(int left, int right) {
             if (left < 0 || right >= n || left > right) {
-                throw new IllegalArgumentException("Invalid query range: [" + left + ", " + right + "]");
+                throw new IllegalArgumentException("Enter a valid range from 0 to " + (n - 1) + ".");
             }
         }
 
@@ -141,56 +119,84 @@ public class SegmentTree {
     }
 
     public static void main(String[] args) {
-        Path inputFile = Path.of(args.length > 0 ? args[0] : "input.txt");
-        Path outputFile = Path.of(args.length > 1 ? args[1] : "output.txt");
+        try (Scanner input = new Scanner(System.in)) {
+            System.out.println("Segment Tree: Range Minimum and Maximum Query");
 
-        try (Scanner input = new Scanner(Files.newBufferedReader(inputFile));
-             BufferedWriter output = Files.newBufferedWriter(outputFile)) {
-
-            int n = input.nextInt();
+            int n = readPositiveInt(input, "Enter the number of elements: ");
             int[] values = new int[n];
+            System.out.println("Enter " + n + " integer values:");
             for (int i = 0; i < n; i++) {
-                values[i] = input.nextInt();
+                values[i] = readInt(input, "Element [" + i + "]: ");
             }
 
             SegmentTree tree = new SegmentTree(values);
-            write(output, "Original array: " + Arrays.toString(values));
-            write(output, "\nSegment Tree representation:");
-            output.write(tree.treeRepresentation());
+            System.out.println("\nOriginal array: " + Arrays.toString(values));
+            System.out.println("\nSegment Tree representation:");
+            System.out.print(tree.treeRepresentation());
 
-            int operations = input.nextInt();
-            for (int i = 0; i < operations; i++) {
-                String command = input.next().toUpperCase();
-                if (command.equals("Q")) {
-                    int left = input.nextInt();
-                    int right = input.nextInt();
-                    Result answer = tree.query(left, right);
-                    write(output, "Query [" + left + ", " + right + "]");
-                    write(output, "Minimum = " + answer.min);
-                    write(output, "Maximum = " + answer.max);
-                } else if (command.equals("U")) {
-                    int index = input.nextInt();
-                    int newValue = input.nextInt();
-                    tree.update(index, newValue);
-                    values[index] = newValue;
-                    write(output, "Update: Index = " + index + ", New Value = " + newValue);
-                    write(output, "Array after update: " + Arrays.toString(values));
-                } else {
-                    throw new IllegalArgumentException("Unknown operation '" + command + "'. Use Q or U.");
+            boolean running = true;
+            while (running) {
+                System.out.println("\n1. Query minimum and maximum in a range");
+                System.out.println("2. Update an array element");
+                System.out.println("3. Show current array and Segment Tree");
+                System.out.println("4. Exit");
+                int choice = readInt(input, "Choose an option: ");
+
+                try {
+                    switch (choice) {
+                        case 1:
+                            int left = readInt(input, "Enter left index (0 to " + (n - 1) + "): ");
+                            int right = readInt(input, "Enter right index (0 to " + (n - 1) + "): ");
+                            Result answer = tree.query(left, right);
+                            System.out.println("Range [" + left + ", " + right + "]");
+                            System.out.println("Minimum = " + answer.min);
+                            System.out.println("Maximum = " + answer.max);
+                            break;
+                        case 2:
+                            int index = readInt(input, "Enter index to update (0 to " + (n - 1) + "): ");
+                            int newValue = readInt(input, "Enter new value: ");
+                            tree.update(index, newValue);
+                            values[index] = newValue;
+                            System.out.println("Updated array: " + Arrays.toString(values));
+                            break;
+                        case 3:
+                            System.out.println("Current array: " + Arrays.toString(values));
+                            System.out.println("Segment Tree representation:");
+                            System.out.print(tree.treeRepresentation());
+                            break;
+                        case 4:
+                            running = false;
+                            System.out.println("Program ended.");
+                            break;
+                        default:
+                            System.out.println("Please enter a number from 1 to 4.");
+                    }
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Input error: " + e.getMessage());
                 }
             }
-
-            write(output, "\nComplexities: build O(n), query O(log n), update O(log n), space O(n).");
-            System.out.println("Results written to " + outputFile.toAbsolutePath());
-        } catch (IOException e) {
-            System.err.println("File error: " + e.getMessage());
-        } catch (RuntimeException e) {
-            System.err.println("Input error: " + e.getMessage());
         }
     }
 
-    private static void write(BufferedWriter output, String text) throws IOException {
-        output.write(text);
-        output.newLine();
+    private static int readPositiveInt(Scanner input, String prompt) {
+        int value;
+        do {
+            value = readInt(input, prompt);
+            if (value <= 0) {
+                System.out.println("Please enter a positive number.");
+            }
+        } while (value <= 0);
+        return value;
+    }
+
+    private static int readInt(Scanner input, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            if (input.hasNextInt()) {
+                return input.nextInt();
+            }
+            System.out.println("Please enter a whole number.");
+            input.next();
+        }
     }
 }
